@@ -393,3 +393,5 @@ Bootstrap secret basics:
 ## License
 
 This export does not include a license file. Choose and add an explicit license before wider publication.
+Maintained by Erina
+
