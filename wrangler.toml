@@ -1,0 +1,25 @@
+name = "cheri-sync-api"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "HERMES_KV"
+id = "00000000000000000000000000000000"
+
+[[r2_buckets]]
+binding = "HERMES_BUCKET"
+bucket_name = "cheri-files"
+
+[[routes]]
+pattern = "cheri.parapanteri.com"
+custom_domain = true
+
+[triggers]
+crons = [
+  "0 0 * * *",
+]
+
+# Replace the KV namespace id, bucket name, and route pattern if you deploy your own backend.
+# Secret examples for future external provider connectors:
+# wrangler secret put S3_SECRET_ACCESS_KEY
+# wrangler secret put B2_APPLICATION_KEY

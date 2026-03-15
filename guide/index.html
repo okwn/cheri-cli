@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cheri Guide</title>
+  <meta name="description" content="CLI-first collaboration and file sync documentation for Cheri.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+
+    <header class="topbar">
+      <div class="brand-panel">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div class="brand-copy">
+          <span class="brand-kicker">Cheri</span>
+          <strong>CLI Guide</strong>
+        </div>
+      </div>
+
+      <div class="topbar-meta">
+        <a class="pill-link" href="../README.md">Repo Overview</a>
+        <a class="pill-link" href="../docs/setup.md">Setup</a>
+        <a class="pill-link" href="../docs/security-notes.md">Security</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar glass-panel">
+        <div class="sidebar-search">
+          <label class="search-label" for="doc-search">Search sections</label>
+          <div class="search-shell">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M10.5 4a6.5 6.5 0 1 0 4.08 11.56l4.43 4.44 1.41-1.42-4.43-4.43A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z"></path>
+            </svg>
+            <input id="doc-search" type="search" placeholder="Type / to focus">
+          </div>
+          <p class="search-meta" id="search-meta">11 sections</p>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Guide sections">
+          <ul id="nav-list"></ul>
+        </nav>
+
+        <div class="sidebar-card stack">
+          <p class="eyebrow">Operator Notes</p>
+          <div class="mini-card">
+            <span class="mini-label">Daily reset</span>
+            <p><code>System (recommended)</code> is temporary. Files reset daily.</p>
+          </div>
+          <div class="mini-card">
+            <span class="mini-label">Keyboard</span>
+            <p><span class="kbd">/</span> focus search, <span class="kbd">Esc</span> clear, <span class="kbd">J</span>/<span class="kbd">K</span> jump sections.</p>
+          </div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section id="overview" class="doc-section hero-section" data-doc-section data-title="Overview">
+          <div class="section-header">
+            <p class="eyebrow">CLI-first documentation</p>
+            <h1>Cheri is now a collaboration CLI with a worker API behind it.</h1>
+            <button class="anchor-button" type="button" aria-label="Copy link to Overview"></button>
+          </div>
+          <p class="lead">
+            The guide now centers on registration, login, workspace selection, file sync flows, task automation, team invites, activity, provider setup, and the security model. Browser approval pages, dashboard-first UX, and worker-rendered UI are out of scope.
+          </p>
+
+          <div class="hero-grid">
+            <article class="glass-panel info-panel">
+              <p class="panel-title">Primary command surface</p>
+              <pre><code>cheri register
+cheri login
+cheri logout
+cheri config get
+cheri config set api-url https://cheri.parapanteri.com
+cheri config check
+cheri workspace create --name &lt;name&gt;
+cheri workspace list
+cheri workspace use &lt;id-or-name&gt;
+cheri file upload &lt;path&gt;
+cheri file download &lt;file-or-id&gt;
+cheri file list
+cheri teams invite
+cheri teams list
+cheri teams invite-reset
+cheri activity
+cheri task create
+cheri task find &lt;name&gt;
+cheri task list
+cheri task start &lt;task-id&gt;
+cheri task stop &lt;task-id&gt;
+cheri task watch --all
+cheri help</code></pre>
+            </article>
+
+            <article class="glass-panel metrics-panel">
+              <p class="panel-title">Design posture</p>
+              <ul class="metric-list">
+                <li><span>CLI-first</span><strong>No dashboard dependency</strong></li>
+                <li><span>Backend URL</span><strong>https://cheri.parapanteri.com</strong></li>
+                <li><span>Workspace model</span><strong>Multi-project access</strong></li>
+                <li><span>File movement</span><strong>Short-lived grants</strong></li>
+                <li><span>Automation</span><strong>Local task runtime</strong></li>
+                <li><span>Local state</span><strong>Opt-in persistence</strong></li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="commands" class="doc-section" data-doc-section data-title="CLI Command Overview">
+          <div class="section-header">
+            <p class="eyebrow">Commands</p>
+            <h2>CLI command overview</h2>
+            <button class="anchor-button" type="button" aria-label="Copy link to CLI Command Overview"></button>
+          </div>
+
+          <div class="card-grid">
+            <article class="glass-panel command-card">
+              <h3>Register / login / logout</h3>
+              <p>Bootstrap identity, re-enter an existing session, and cleanly remove local state.</p>
+              <pre><code>cheri register
+cheri login
+cheri logout</code></pre>
+            </article>
+
+            <article class="glass-panel command-card">
+              <h3>Backend config</h3>
+              <p>Cheri resolves the Worker API URL from environment variables, saved local config, or deployment metadata derived from Wrangler files.</p>
+              <pre><code>cheri config get
+cheri config set api-url https://cheri.parapanteri.com
+cheri config reset
+cheri config check</code></pre>
+            </article>
+
+            <article class="glass-panel command-card">
+              <h3>Upload / download / list</h3>
+              <p>File movement is grant-based and defaults to the active workspace, with one-off <code>--workspace</code> overrides when needed.</p>
+              <pre><code>cheri file upload .\notes.txt
+cheri file list
+cheri file download notes.txt</code></pre>
+            </article>
+
+            <article class="glass-panel command-card">
+              <h3>Teams and activity</h3>
+              <p>Invite collaborators, inspect membership, revoke invite generations, and review activity.</p>
+              <pre><code>cheri teams invite
+cheri teams list
+cheri teams invite-reset
+cheri activity</code></pre>
+            </article>
+
+            <article class="glass-panel command-card">
+              <h3>Task automation</h3>
+              <p>Create local sync tasks for files and directories. New tasks start background watching immediately unless you pass <code>--no-start</code>.</p>
+              <pre><code>cheri task create --directory cheri_test_files --mode on-change
+cheri task start &lt;task-id&gt;
+cheri task stop &lt;task-id&gt;
+cheri task list
+cheri task run &lt;task-id&gt;</code></pre>
+            </article>
+
+            <article class="glass-panel command-card">
+              <h3>Workspace switching</h3>
+              <p>One authenticated user can keep multiple workspaces, list them, and explicitly change the saved active target.</p>
+              <pre><code>cheri workspace
+cheri workspace list
+cheri workspace create --name project-alpha
+cheri workspace use project-alpha
+cheri help workspace</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section id="task-automation" class="doc-section" data-doc-section data-title="Task Automation">
+          <div class="section-header">
+            <p class="eyebrow">Automation</p>
+            <h2>Task automation</h2>
+            <button class="anchor-button" type="button" aria-label="Copy link to Task Automation"></button>
+          </div>
+
+          <div class="flow-grid">
+            <article class="glass-panel">
+              <h3>Task commands</h3>
+              <pre><code>cheri task create --directory cheri_test_files --mode on-change
+cheri task create --directory "C:\Users\Name\Desktop\cheri_test_files" --mode on-change
+cheri task find cheri_test_files
+cheri task start &lt;task-id&gt;
+cheri task stop &lt;task-id&gt;
+cheri task remove &lt;task-id&gt;
+cheri task logs &lt;task-id&gt;</code></pre>
+            </article>
+
+            <article class="glass-panel">
+              <h3>Runtime posture</h3>
+              <ul class="bullet-list">
+                <li>Task definitions, runtime snapshots, and logs stay local to the operator machine.</li>
+                <li>New tasks auto-start a background watcher and can still be overridden with <code>task watch</code>.</li>
+                <li>Directory tasks preserve relative paths such as <code>src/app.js</code> in the workspace file registry.</li>
+                <li>Summary events are mirrored into workspace activity after each run.</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="card-grid two-up">
+            <article class="glass-panel">
+              <h3>Defaults</h3>
+              <ul class="bullet-list">
+                <li>File tasks default to <code>instant</code>.</li>
+                <li>Directory tasks default to <code>on-change</code> with debounce.</li>
+                <li><code>upload-only</code> is the current safe default direction.</li>
+                <li>Recursive directory watching is enabled by default.</li>
+              </ul>
+            </article>
+
+            <article class="glass-panel">
+              <h3>Safety controls</h3>
+              <ul class="bullet-list">
+                <li>Paths are normalized before task creation.</li>
+                <li>Simple names are resolved from the current folder, Desktop, Documents, and Downloads.</li>
+                <li>Temporary and editor-noise files are excluded by default.</li>
+                <li>Stopped tasks do not run until started again.</li>
+                <li>Errored tasks stop automatic execution until the operator intervenes.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="auth-bootstrap" class="doc-section" data-doc-section data-title="Auth and Bootstrap Flow">
+          <div class="section-header">
+            <p class="eyebrow">Identity</p>
+            <h2>Auth and bootstrap flow</h2>
+            <button class="anchor-button" type="button" aria-label="Copy link to Auth and Bootstrap Flow"></button>
+          </div>
+
+          <div class="flow-grid">
+            <article class="glass-panel">
+              <h3>Register</h3>
+              <ol class="numbered">
+                <li>Ask for username.</li>
+                <li>Ask for the first workspace name.</li>
+                <li>Ask for a storage provider.</li>
+                <li>Require confirmation for <code>System (recommended)</code>.</li>
+                <li>Generate a 12-word bootstrap secret.</li>
+                <li>Create the session and active workspace.</li>
+                <li>Offer local save or copy-only output.</li>
+              </ol>
+            </article>
+
+            <article class="glass-panel">
+              <h3>Login</h3>
+              <ul class="bullet-list">
+                <li>Refreshes a saved valid session when possible.</li>
+                <li>Falls back to username + bootstrap secret when needed.</li>
+                <li>Uses <code>cheri workspace join &lt;invite-code&gt;</code> for the clean join flow.</li>
+                <li>Never depends on a browser approval page.</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="callout warning">
+            <strong>Bootstrap secret scope</strong>
+            <p>The 12-word bootstrap secret is only for the user's own bootstrap and login identity flow. It is not reused as a team invite.</p>
+          </div>
+        </section>
+
+        <section id="local-state" class="doc-section" data-doc-section data-title="Local Save vs Copy Behavior">
+          <div class="section-header">
+            <p class="eyebrow">State handling</p>
+            <h2>Local save vs copy behavior</h2>
+            <button class="anchor-button" type="button" aria-label="Copy link to Local Save vs Copy Behavior"></button>
+          </div>
+
+          <div class="card-grid two-up">
+            <article class="glass-panel">
+              <h3>Save locally</h3>
+              <ul class="bullet-list">
+                <li>Stores public state and sensitive credentials in separate files.</li>
+                <li>Keeps the session token out of the general workspace summary file.</li>
+                <li>Only stores the bootstrap secret when the operator explicitly chooses to save it.</li>
+                <li>Uses a storage abstraction so encrypted-at-rest support can be added later.</li>
+              </ul>
+            </article>
+
+            <article class="glass-panel">
+              <h3>Copy instead</h3>
+              <ul class="bullet-list">
+                <li>Does not persist local state.</li>
+                <li>Prints a copy-friendly JSON payload.</li>
+                <li>Leaves secret handling explicit and operator-controlled.</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="callout info">
+            <strong>Explicit by design</strong>
+            <p>Cheri does not assume local persistence. The user must opt in to save credentials on the machine.</p>
+          </div>
+        </section>
+
+        <section id="invite-codes" class="doc-section" data-doc-section data-title="Invite Code Format">
+          <div class="section-header">
+            <p class="eyebrow">Collaboration</p>
+            <h2>Invite code format</h2>
+            <button class="anchor-button" type="button" aria-label="Copy link to Invite Code Format"></button>
+          </div>
+
+          <div class="card-grid two-up">
+            <article class="glass-panel">
+              <h3>Current format</h3>
+              <pre><code>CHR-TEAM-8X2K91QZ</code></pre>
+              <p>Invite codes are short, workspace join tokens created by admins.</p>
+            </article>
+
+            <article class="glass-panel">
+              <h3>Lifecycle</h3>
+              <ul class="bullet-list">
+                <li>Stored as invite records in the backend.</li>
+                <li>Accepted via CLI, not an HTML invite page.</li>
+                <li>Revoked by <code>cheri teams invite-reset</code>.</li>
+                <li>Replacement codes can be minted immediately after reset.</li>
+                <li>Separate from session tokens and bootstrap secrets.</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="callout security">
+            <strong>No phrase reuse</strong>
+            <p>Invite codes never reuse the 12-word bootstrap identity format. That separation reduces operator confusion and keeps join credentials distinct from login credentials.</p>
+          </div>
+        </section>
+
+        <section id="workspaces" class="doc-section" data-doc-section data-title="Workspace and Multi-project Behavior">
+          <div class="section-header">
+            <p class="eyebrow">Workspace model</p>
+            <h2>Workspace and multi-project behavior</h2>
+            <button class="anchor-button" type="button" aria-label="Copy link to Workspace and Multi-project Behavior"></button>
+          </div>
+
+          <div class="flow-grid">
+            <article class="glass-panel">
+              <h3>Active workspace</h3>
+              <pre><code>cheri workspace
+cheri workspace list
+cheri workspace create --name team-alpha
+cheri workspace use team-alpha
+cheri workspace join CHR-TEAM-8X2K91QZ</code></pre>
+              <p>Without a subcommand, Cheri lists accessible workspaces. <code>workspace create</code> creates and selects. <code>workspace use</code> switches the saved active workspace. <code>workspace join</code> accepts a team invite and switches to the joined workspace.</p>
+            </article>
+
+            <article class="glass-panel">
+              <h3>Multi-project access</h3>
+              <ul class="bullet-list">
+                <li>One user can belong to multiple workspaces.</li>
+                <li>The session remains user-scoped, not workspace-scoped.</li>
+                <li>Invite acceptance adds membership instead of replacing prior access.</li>
+                <li>File and team commands default to the active workspace and support <code>--workspace</code> overrides without rewriting it.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="providers" class="doc-section" data-doc-section data-title="Storage Provider Matrix">
+          <div class="section-header">
+            <p class="eyebrow">Storage</p>
+            <h2>Storage provider matrix</h2>
+            <button class="anchor-button" type="button" aria-label="Copy link to Storage Provider Matrix"></button>
+          </div>
+
+          <div class="table-panel glass-panel">
+            <table>
+              <thead>
+                <tr>
+                  <th>Provider</th>
+                  <th>Status</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>System (recommended)</code></td>
+                  <td><span class="status status-live">Connected</span></td>
+                  <td>Temporary workspace storage. Files reset daily.</td>
+                </tr>
+                <tr>
+                  <td><code>S3-compatible</code></td>
+                  <td><span class="status">Coming soon</span></td>
+                  <td>Validation and config plumbing exist, but public selection is disabled in the production setup flow.</td>
+                </tr>
+                <tr>
+                  <td><code>Google Drive</code></td>
+                  <td><span class="status">Coming soon</span></td>
+                  <td>Validation and config plumbing exist, but public selection is disabled in the production setup flow.</td>
+                </tr>
+                <tr>
+                  <td><code>Backblaze B2</code></td>
+                  <td><span class="status">Coming soon</span></td>
+                  <td>Validation and config plumbing exist, but public selection is disabled in the production setup flow.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout provider">
+            <strong>System provider warning</strong>
+            <p>System storage is temporary. Files are reset daily. Cheri requires explicit confirmation during register and workspace creation before continuing with this provider.</p>
+          </div>
+        </section>
+
+        <section id="security" class="doc-section" data-doc-section data-title="Security Notes">
+          <div class="section-header">
+            <p class="eyebrow">Security</p>
+            <h2>Security notes</h2>
+            <button class="anchor-button" type="button" aria-label="Copy link to Security Notes"></button>
+          </div>
+
+          <div class="secret-grid">
+            <article class="glass-panel secret-card">
+              <h3>Bootstrap secret</h3>
+              <p>12 words. Used only for user bootstrap and login identity.</p>
+            </article>
+            <article class="glass-panel secret-card">
+              <h3>Session token</h3>
+              <p>Bearer session credential for active CLI access.</p>
+            </article>
+            <article class="glass-panel secret-card">
+              <h3>Invite code</h3>
+              <p>Short workspace join token for team onboarding.</p>
+            </article>
+            <article class="glass-panel secret-card">
+              <h3>Provider credentials</h3>
+              <p>Workspace storage integration material, not user auth.</p>
+            </article>
+          </div>
+
+          <div class="card-grid two-up">
+            <article class="glass-panel">
+              <h3>What the current repo hardens</h3>
+              <ul class="bullet-list">
+                <li>Short-lived upload and download grants.</li>
+                <li>Membership validation on file and team actions.</li>
+                <li>Admin checks for invite creation and invite reset.</li>
+                <li>Explicit workspace overrides do not silently change the saved active workspace.</li>
+                <li>Provider summaries redact secret fields.</li>
+                <li>Worker responses avoid exposing raw storage internals.</li>
+              </ul>
+            </article>
+
+            <article class="glass-panel">
+              <h3>Operator expectations</h3>
+              <ul class="bullet-list">
+                <li>Do not log bootstrap secrets or session tokens.</li>
+                <li>Treat invite codes as join credentials.</li>
+                <li>Treat provider keys as workspace integration secrets.</li>
+                <li>Use local save only on trusted machines.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="sync-roadmap" class="doc-section" data-doc-section data-title="Sync Roadmap and Versioning Strategy">
+          <div class="section-header">
+            <p class="eyebrow">Sync model</p>
+            <h2>Sync roadmap and versioning strategy</h2>
+            <button class="anchor-button" type="button" aria-label="Copy link to Sync Roadmap and Versioning Strategy"></button>
+          </div>
+
+          <div class="card-grid two-up">
+            <article class="glass-panel">
+              <h3>What exists now</h3>
+              <ul class="bullet-list">
+                <li>Workspace-scoped file registry.</li>
+                <li>Version increments on same-name uploads.</li>
+                <li>Uploader, editor, checksum, and timestamps in metadata.</li>
+                <li>Activity feed for uploads, modifications, membership, and invite events.</li>
+                <li>Local task automation with persisted definitions and run logs.</li>
+              </ul>
+            </article>
+
+            <article class="glass-panel">
+              <h3>Roadmap direction</h3>
+              <ul class="bullet-list">
+                <li>Local-to-remote sync loops.</li>
+                <li>Conflict detection hooks.</li>
+                <li>Encrypted local state.</li>
+                <li>External provider connectors.</li>
+                <li>Richer session rotation semantics.</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="callout info">
+            <strong>Versioning strategy</strong>
+            <p>Cheri keeps a stable file id and appends version metadata when the same file name is uploaded again, preparing the backend for future conflict-aware sync instead of one-off artifact transfer.</p>
+          </div>
+        </section>
+
+        <section id="architecture" class="doc-section" data-doc-section data-title="Architecture Snapshot">
+          <div class="section-header">
+            <p class="eyebrow">Implementation</p>
+            <h2>Architecture snapshot</h2>
+            <button class="anchor-button" type="button" aria-label="Copy link to Architecture Snapshot"></button>
+          </div>
+
+          <div class="card-grid">
+            <article class="glass-panel">
+              <h3>CLI modules</h3>
+              <pre><code>auth/
+workspace/
+teams/
+files/
+activity/
+providers/
+sessions/
+security/
+task/
+services/</code></pre>
+            </article>
+
+            <article class="glass-panel">
+              <h3>Worker modules</h3>
+              <pre><code>auth/
+workspace/
+teams/
+files/
+activity/
+providers/
+services/
+security/
+lib/</code></pre>
+            </article>
+
+            <article class="glass-panel">
+              <h3>Removed from the product direction</h3>
+              <ul class="bullet-list">
+                <li>Dashboard pages</li>
+                <li>Browser approval flows</li>
+                <li>Worker-rendered UI</li>
+                <li>Skills and task dashboard coupling</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
