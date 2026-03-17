@@ -52,7 +52,7 @@ Still limited:
 
 ## Architecture
 
-Cheri has three main pieces:
+Cheri has three main pieces;;
 
 1. CLI client
    - Python package in `cheri_cloud_cli/`
